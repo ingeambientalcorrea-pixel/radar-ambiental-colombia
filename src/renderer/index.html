@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Radar Ambiental Colombia</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo">🌎</div>
+      <div><h1>RADAR AMBIENTAL COLOMBIA</h1><p>Inteligencia regulatoria, ambiental y de sostenibilidad para organizaciones en Colombia</p></div>
+    </div>
+    <div class="syncbox">
+      <div class="syncrow"><b id="syncStatus">Preparando actualización…</b><button id="refresh">↻ Actualizar</button></div>
+      <div class="progress"><div id="progressBar"></div></div>
+      <small id="syncDetail">Al abrir se revisan fuentes oficiales, gremios y portales especializados.</small>
+    </div>
+  </header>
+
+  <nav>
+    <button class="active" data-view="dashboard">Dashboard</button>
+    <button data-view="database">Base documental</button>
+    <button data-view="searchView">Buscador</button>
+    <button data-view="intelligence">Inteligencia sectorial</button>
+    <button data-view="news">Novedades documentales</button>
+    <button data-view="jurisprudence">Jurisprudencia</button>
+    <button data-view="sources">Fuentes</button>
+    <button data-view="ai">IA</button>
+  </nav>
+
+  <main>
+    <section id="dashboard" class="view active">
+      <div class="section-title"><div><h2>Dashboard ejecutivo</h2><p>Panorama consolidado para el equipo ambiental y de sostenibilidad.</p></div></div>
+      <div class="stats" id="dashboardStats"></div>
+      <div class="grid2">
+        <div class="panel"><h3>Clasificación por temas</h3><div id="topicChart" class="barlist"></div></div>
+        <div class="panel"><h3>Tipos de contenido</h3><div id="familyChart" class="barlist"></div></div>
+      </div>
+      <div class="grid2">
+        <div class="panel"><div class="panelhead"><h3>Documentos recientes</h3><button class="ghost" data-go="news">Ver novedades</button></div><div id="latestList"></div></div>
+        <div class="panel"><div class="panelhead"><h3>Alertas y noticias para la organización</h3><button class="ghost" data-go="intelligence">Abrir inteligencia</button></div><div id="latestIntelligence"></div></div>
+      </div>
+    </section>
+
+    <section id="database" class="view">
+      <div class="section-title"><div><h2>Base documental</h2><p>Normativa, jurisprudencia, políticas, planes e instrumentos técnicos. Las noticias se consultan en Inteligencia sectorial.</p></div></div>
+      <div id="databaseTable" class="panel"></div>
+    </section>
+
+    <section id="searchView" class="view">
+      <div class="section-title"><div><h2>Buscador avanzado</h2><p>Busca en documentos y noticias por texto, tema, autoridad, territorio, tipo y sector económico.</p></div></div>
+      <div class="filterbox">
+        <input id="search" placeholder="Ej.: vertimientos, economía circular, NIIF S2, El Niño, Resolución 631…" />
+        <select id="topicFilter"><option value="">Todos los temas</option></select>
+        <select id="authorityFilter"><option value="">Todas las autoridades/fuentes</option></select>
+        <select id="geoFilter"><option value="">Todo el territorio</option></select>
+        <select id="familyFilter"><option value="">Todos los tipos</option></select>
+        <select id="sectorFilter"><option value="">Todos los sectores</option></select>
+        <button id="searchButton">Buscar</button>
+        <button id="clearButton" class="ghost">Limpiar</button>
+      </div>
+      <div id="searchCount" class="resultcount"></div>
+      <div id="searchResults"></div>
+    </section>
+
+    <section id="intelligence" class="view">
+      <div class="section-title">
+        <div><h2>Inteligencia sectorial y sostenibilidad</h2><p>Noticias, comunicados, monitoreo regulatorio, tendencias ESG/ASG y estudios con posible impacto empresarial.</p></div>
+        <button id="markIntelligenceSeen" class="ghost">Marcar como revisadas</button>
+      </div>
+      <div class="callout"><b>Enfoque empresarial:</b> el Radar filtra contenido por relevancia ambiental/sostenibilidad y prioriza alertas regulatorias y efectos sobre cumplimiento, operación, costos, riesgo climático, estrategia y reputación.</div>
+      <div class="filterbox intelligencefilters">
+        <select id="intelTopicFilter"><option value="">Todos los temas</option></select>
+        <select id="intelSectorFilter"><option value="">Todos los sectores</option></select>
+        <select id="intelAlertFilter"><option value="">Todos los niveles</option></select>
+        <input id="intelSearch" placeholder="Filtrar noticias: carbono, agua, residuos, energía…" />
+        <button id="intelSearchButton">Filtrar</button>
+        <button id="intelClearButton" class="ghost">Limpiar</button>
+      </div>
+      <div id="intelligenceCount" class="resultcount"></div>
+      <div id="intelligenceList"></div>
+    </section>
+
+    <section id="news" class="view">
+      <div class="section-title"><div><h2>Novedades documentales</h2><p>Normas, sentencias, políticas, planes y documentos técnicos nuevos o modificados. No incluye noticias sectoriales.</p></div><button id="markSeen" class="ghost">Marcar como revisados</button></div>
+      <div id="newsList"></div>
+    </section>
+
+    <section id="jurisprudence" class="view">
+      <div class="section-title"><div><h2>Módulo de jurisprudencia</h2><p>Sentencias y providencias ambientales recopiladas de repositorios judiciales.</p></div></div>
+      <div id="jurisprudenceList"></div>
+    </section>
+
+    <section id="sources" class="view">
+      <div class="section-title"><div><h2>Fuentes monitoreadas</h2><p>Repositorios oficiales, gremios empresariales, centros de sostenibilidad y portales ambientales. Cada fuente mantiene enlace directo al sitio rastreado.</p></div></div>
+      <div id="sourcesList"></div>
+    </section>
+
+    <section id="ai" class="view">
+      <div class="section-title"><div><h2>Arquitectura preparada para IA</h2><p>Además de documentos jurídicos, la estructura ya permite análisis empresarial de noticias y alertas.</p></div></div>
+      <div class="ai-flow">
+        <div><b>1. Fuente</b><span>Norma, sentencia, plan, gremio o portal</span></div><i>→</i>
+        <div><b>2. Extracción</b><span>Metadatos, fecha, sector y territorio</span></div><i>→</i>
+        <div><b>3. Clasificación</b><span>Tema, impacto empresarial y prioridad</span></div><i>→</i>
+        <div><b>4. IA/NLP</b><span>Resumen ejecutivo, obligaciones, riesgos y oportunidades</span></div>
+      </div>
+      <div class="grid2">
+        <div class="panel"><h3>Campos V0.4</h3><p>Sector, categoría de fuente, impacto empresarial, relevancia, nivel de alerta y razón de relevancia.</p><p class="muted">Estos campos permiten después construir briefs diarios personalizados por organización y sector.</p></div>
+        <div class="panel"><h3>Trazabilidad</h3><p>Noticias y análisis gremiales se identifican como fuentes secundarias. Cuando una alerta cite una norma, la verificación jurídica debe hacerse en el documento oficial.</p></div>
+      </div>
+    </section>
+  </main>
+  <script src="app.js"></script>
+</body>
+</html>

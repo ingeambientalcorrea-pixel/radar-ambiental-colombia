@@ -1,0 +1,40 @@
+{
+  "name": "radar-ambiental-colombia",
+  "version": "0.4.0",
+  "description": "Radar de inteligencia regulatoria, ambiental, sectorial y de sostenibilidad para organizaciones en Colombia",
+  "main": "src/main/main.js",
+  "author": "Radar Ambiental Colombia",
+  "license": "MIT",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron .",
+    "build": "electron-builder --win nsis",
+    "postinstall": "electron-rebuild -f -w better-sqlite3",
+    "rebuild": "electron-rebuild -f -w better-sqlite3"
+  },
+  "dependencies": {
+    "better-sqlite3": "^11.7.0",
+    "cheerio": "^1.0.0"
+  },
+  "devDependencies": {
+    "electron": "^38.0.0",
+    "electron-builder": "^26.0.12",
+    "@electron/rebuild": "^4.2.0"
+  },
+  "build": {
+    "appId": "co.radarambiental.colombia",
+    "productName": "Radar Ambiental Colombia",
+    "files": [
+      "src/**/*",
+      "package.json",
+      "sources_registry.csv"
+    ],
+    "directories": {
+      "output": "dist"
+    },
+    "win": {
+      "target": "nsis",
+      "artifactName": "Radar-Ambiental-Colombia-Setup-${version}.exe"
+    }
+  }
+}
