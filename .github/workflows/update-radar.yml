@@ -2,23 +2,24 @@ name: Actualizar Radar Ambiental
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - main
   schedule:
     - cron: "15 11 * * *"
+
+concurrency:
+  group: radar-ambiental-update
+  cancel-in-progress: false
 
 jobs:
   update:
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
-      - name: Esperar despliegue de Vercel
+      - name: Verificar producción
         shell: bash
         run: |
           set -euo pipefail
           BASE_URL="https://radar-ambiental-colombia-ashen.vercel.app"
-          for attempt in $(seq 1 30); do
+          for attempt in $(seq 1 12); do
             if curl --fail --silent --show-error --max-time 12 "$BASE_URL/api/health" > health.json; then
               if jq -e '.ok == true' health.json > /dev/null; then
                 echo "Producción disponible"
@@ -26,7 +27,7 @@ jobs:
                 exit 0
               fi
             fi
-            echo "Esperando Vercel... intento $attempt/30"
+            echo "Esperando producción... intento $attempt/12"
             sleep 10
           done
           echo "La producción no respondió a tiempo"
@@ -38,8 +39,15 @@ jobs:
         run: |
           set -euo pipefail
           BASE_URL="https://radar-ambiental-colombia-ashen.vercel.app"
-          curl --fail --silent --show-error --max-time 20 "$BASE_URL/api/update" > targets.json
-          echo "Fuentes disponibles para actualización: $(jq '.total' targets.json)"
+          for attempt in $(seq 1 6); do
+            if curl --fail --silent --show-error --max-time 20 "$BASE_URL/api/update" > targets.json; then
+              echo "Fuentes disponibles para actualización: $(jq '.total' targets.json)"
+              exit 0
+            fi
+            echo "Reintentando listado de fuentes... $attempt/6"
+            sleep 10
+          done
+          exit 1
 
       - name: Actualizar fuentes secuencialmente
         shell: bash
@@ -60,7 +68,7 @@ jobs:
               --max-time 35 \
               -X POST "$BASE_URL/api/update" \
               -H "Content-Type: application/json" \
-              -H "X-Radar-Job: github-action-v0.6" \
+              -H "X-Radar-Job: github-action-v0.6.2" \
               --data "{\"sourceId\":\"$source_id\"}" \
               > "result-$source_id.json"; then
               inserted=$(jq -r '.result.inserted // 0' "result-$source_id.json")
