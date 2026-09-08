@@ -1,4 +1,5 @@
 import { collectSourceById, listCollectableSources } from "@/lib/collector";
+import { enrichSourceItems } from "@/lib/enrichment";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 30;
@@ -33,7 +34,20 @@ export async function POST(request: Request) {
     }
 
     const result = await collectSourceById(sourceId);
-    return Response.json({ ok: result.status === "success", result }, { status: result.status === "success" ? 200 : 502 });
+    let enrichment = { documents: 0, news: 0 };
+
+    if (result.status === "success" && result.found > 0) {
+      try {
+        enrichment = await enrichSourceItems(sourceId);
+      } catch {
+        // El enriquecimiento es complementario: una falla no invalida la captura principal.
+      }
+    }
+
+    return Response.json(
+      { ok: result.status === "success", result, enrichment },
+      { status: result.status === "success" ? 200 : 502 },
+    );
   } catch (error) {
     return Response.json(
       {
