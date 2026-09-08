@@ -1,17 +1,49 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+
+const AUTO_REFRESH_AFTER_MS = 6 * 60 * 60 * 1000;
+const LOCAL_AUTO_KEY = "radar-ambiental-last-auto-refresh";
 
 export default function UpdateRadarButton() {
   const [running, setRunning] = useState(false);
   const [progress, setProgress] = useState({ done: 0, total: 0, inserted: 0, updated: 0, errors: 0 });
   const [message, setMessage] = useState("Listo para actualizar");
 
-  async function runUpdate() {
+  useEffect(() => {
+    let cancelled = false;
+
+    async function maybeAutoUpdate() {
+      try {
+        const localLast = Number(window.localStorage.getItem(LOCAL_AUTO_KEY) || 0);
+        if (localLast && Date.now() - localLast < AUTO_REFRESH_AFTER_MS) return;
+
+        const response = await fetch("/api/health", { cache: "no-store" });
+        if (!response.ok) return;
+        const health = await response.json();
+        const lastCrawl = health.lastCrawlAt ? Date.parse(String(health.lastCrawlAt)) : 0;
+        const stale = !lastCrawl || Date.now() - lastCrawl > AUTO_REFRESH_AFTER_MS;
+
+        if (!cancelled && stale) {
+          window.localStorage.setItem(LOCAL_AUTO_KEY, String(Date.now()));
+          await runUpdate(true);
+        }
+      } catch {
+        // La actualización automática es complementaria: el botón manual sigue disponible.
+      }
+    }
+
+    void maybeAutoUpdate();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  async function runUpdate(automatic = false) {
     if (running) return;
     setRunning(true);
     setProgress({ done: 0, total: 0, inserted: 0, updated: 0, errors: 0 });
-    setMessage("Preparando fuentes...");
+    setMessage(automatic ? "Radar desactualizado: iniciando actualización automática..." : "Preparando fuentes...");
 
     try {
       const targetsResponse = await fetch("/api/update", { cache: "no-store" });
@@ -50,6 +82,7 @@ export default function UpdateRadarButton() {
         }
       }
 
+      window.localStorage.setItem(LOCAL_AUTO_KEY, String(Date.now()));
       setMessage("Actualización terminada. Recargando resultados...");
       window.location.reload();
     } catch (error) {
@@ -62,7 +95,7 @@ export default function UpdateRadarButton() {
 
   return (
     <div className="update-control">
-      <button className="primary-button" onClick={runUpdate} disabled={running}>
+      <button className="primary-button" onClick={() => void runUpdate(false)} disabled={running}>
         {running ? "Actualizando..." : "↻ Actualizar Radar"}
       </button>
       <div className="update-progress" aria-live="polite">
