@@ -1,3 +1,4 @@
+import Link from "next/link";
 import Sidebar from "@/components/Sidebar";
 import { getNews, getNewsFilterOptions, type CatalogFilters } from "@/lib/catalog";
 
@@ -67,7 +68,7 @@ export default async function NewsPage({ searchParams }: { searchParams: SearchP
                     <span className="date">{formatDate(item.published_at || item.first_seen_at)}</span>
                   </div>
 
-                  <h2>{item.title}</h2>
+                  <h2><Link className="title-link" href={`/news/${item.id}`}>{item.title}</Link></h2>
 
                   <div className="metadata metadata-grid">
                     <span><b>Tema:</b> {item.main_topic || "Gestión ambiental"}</span>
@@ -79,11 +80,12 @@ export default async function NewsPage({ searchParams }: { searchParams: SearchP
                   <p>{item.summary || item.description || item.relevance_reason || "Publicación relevante para equipos ambientales y de sostenibilidad."}</p>
                   {item.relevance_reason ? <div className="why-box"><b>¿Por qué importa?</b> {item.relevance_reason}</div> : null}
 
-                  {item.canonical_url ? (
-                    <div className="card-actions">
-                      <a className="button-link" href={item.canonical_url} target="_blank" rel="noreferrer">Abrir publicación ↗</a>
-                    </div>
-                  ) : null}
+                  <div className="card-actions">
+                    <Link className="button-link" href={`/news/${item.id}`}>Ver análisis</Link>
+                    {item.canonical_url ? (
+                      <a className="button-link secondary" href={item.canonical_url} target="_blank" rel="noreferrer">Abrir publicación ↗</a>
+                    ) : null}
+                  </div>
                 </article>
               ))}
             </div>
