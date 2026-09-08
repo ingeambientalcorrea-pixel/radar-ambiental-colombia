@@ -1,5 +1,6 @@
 import { collectSourceById, listCollectableSources } from "@/lib/collector";
 import { ensureCoreSources } from "@/lib/core-sources";
+import { normalizeSourceItems } from "@/lib/data-quality";
 import { enrichSourceItems } from "@/lib/enrichment";
 
 export const dynamic = "force-dynamic";
@@ -37,6 +38,7 @@ export async function POST(request: Request) {
 
     const result = await collectSourceById(sourceId);
     let enrichment = { documents: 0, news: 0 };
+    let quality = { documents: 0, news: 0 };
 
     if (result.status === "success" && result.found > 0) {
       try {
@@ -44,10 +46,16 @@ export async function POST(request: Request) {
       } catch {
         // El enriquecimiento es complementario: una falla no invalida la captura principal.
       }
+
+      try {
+        quality = await normalizeSourceItems(sourceId);
+      } catch {
+        // La normalización también es complementaria y no invalida el rastreo.
+      }
     }
 
     return Response.json(
-      { ok: result.status === "success", result, enrichment },
+      { ok: result.status === "success", result, enrichment, quality },
       { status: result.status === "success" ? 200 : 502 },
     );
   } catch (error) {
