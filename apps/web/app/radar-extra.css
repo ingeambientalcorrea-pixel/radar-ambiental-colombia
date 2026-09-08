@@ -240,6 +240,37 @@
   color: #9b2c2c;
 }
 
+.title-link {
+  color: inherit;
+  text-decoration: none;
+}
+
+.title-link:hover {
+  color: #1f6643;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+.detail-copy {
+  color: #53645a;
+  font-size: 15px;
+  line-height: 1.7;
+}
+
+.detail-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 16px 0;
+}
+
+.detail-metadata {
+  margin-top: 22px;
+  padding-top: 18px;
+  border-top: 1px solid #edf1ef;
+}
+
 @media (max-width: 1150px) {
   .advanced-filters,
   .compact-filters {
