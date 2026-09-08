@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-export default function Sidebar({ active }: { active: "dashboard" | "documents" | "news" | "sources" }) {
+export default function Sidebar({ active }: { active: "dashboard" | "documents" | "news" | "sources" | "status" }) {
   return (
     <aside className="sidebar">
       <div className="brand">
@@ -23,6 +23,7 @@ export default function Sidebar({ active }: { active: "dashboard" | "documents" 
 
         <div className="nav-title">SISTEMA</div>
         <Link className={`nav-item ${active === "sources" ? "active" : ""}`} href="/sources">🔗 Fuentes</Link>
+        <Link className={`nav-item ${active === "status" ? "active" : ""}`} href="/status">● Estado del sistema</Link>
       </nav>
     </aside>
   );
