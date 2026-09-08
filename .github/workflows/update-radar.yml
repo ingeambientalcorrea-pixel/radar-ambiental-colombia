@@ -1,0 +1,50 @@
+name: Actualizar Radar Ambiental
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "15 11 * * *"
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Obtener fuentes operativas
+        id: targets
+        shell: bash
+        run: |
+          set -euo pipefail
+          BASE_URL="https://radar-ambiental-colombia-ashen.vercel.app"
+          curl --fail --silent --show-error "$BASE_URL/api/update" > targets.json
+          echo "Fuentes disponibles: $(jq '.total' targets.json)"
+
+      - name: Actualizar fuentes secuencialmente
+        shell: bash
+        run: |
+          set -u
+          BASE_URL="https://radar-ambiental-colombia-ashen.vercel.app"
+          total=$(jq '.sources | length' targets.json)
+          done_count=0
+          error_count=0
+
+          jq -r '.sources[].id' targets.json | while read -r source_id; do
+            done_count=$((done_count + 1))
+            echo "[$done_count/$total] Fuente $source_id"
+
+            if curl --fail --silent --show-error \
+              --max-time 35 \
+              -X POST "$BASE_URL/api/update" \
+              -H "Content-Type: application/json" \
+              --data "{\"sourceId\":\"$source_id\"}" \
+              > "result-$source_id.json"; then
+              jq -c '{source:.result.sourceName, found:.result.found, inserted:.result.inserted, updated:.result.updated, unchanged:.result.unchanged, enrichment:.enrichment}' "result-$source_id.json" || true
+            else
+              error_count=$((error_count + 1))
+              echo "Advertencia: la fuente $source_id no pudo actualizarse"
+            fi
+
+            sleep 1
+          done
+
+          echo "Actualización programada finalizada"
