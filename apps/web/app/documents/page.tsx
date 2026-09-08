@@ -1,3 +1,4 @@
+import Link from "next/link";
 import Sidebar from "@/components/Sidebar";
 import { getDocumentFilterOptions, getDocuments, type CatalogFilters } from "@/lib/catalog";
 
@@ -90,7 +91,7 @@ export default async function DocumentsPage({ searchParams }: { searchParams: Se
                     <span className="date">{formatDate(doc.date_published || doc.date_issued || doc.first_seen_at)}</span>
                   </div>
 
-                  <h2>{doc.title}</h2>
+                  <h2><Link className="title-link" href={`/documents/${doc.id}`}>{doc.title}</Link></h2>
 
                   <div className="metadata metadata-grid">
                     <span><b>Autoridad:</b> {doc.authority || "No identificada"}</span>
@@ -104,7 +105,8 @@ export default async function DocumentsPage({ searchParams }: { searchParams: Se
                   <p>{doc.summary || doc.description || "Documento detectado por Radar Ambiental Colombia."}</p>
 
                   <div className="card-actions">
-                    {doc.pdf_url ? <a className="button-link" href={doc.pdf_url} target="_blank" rel="noreferrer">Descargar / ver PDF ↗</a> : null}
+                    <Link className="button-link" href={`/documents/${doc.id}`}>Ver ficha completa</Link>
+                    {doc.pdf_url ? <a className="button-link secondary" href={doc.pdf_url} target="_blank" rel="noreferrer">Descargar / ver PDF ↗</a> : null}
                     {doc.official_url ? <a className="button-link secondary" href={doc.official_url} target="_blank" rel="noreferrer">Fuente oficial ↗</a> : null}
                   </div>
                 </article>
