@@ -1,135 +1,200 @@
-# Radar Ambiental Colombia V0.4.0
+# Radar Ambiental Colombia V0.6
 
-Aplicación de escritorio Electron orientada a **equipos ambientales y de sostenibilidad de organizaciones en Colombia**. Consolida documentación ambiental oficial y, desde V0.4, incorpora vigilancia de noticias, alertas regulatorias, publicaciones gremiales, estudios sectoriales y contenidos de sostenibilidad empresarial.
+**Radar Ambiental Colombia** es una plataforma web de inteligencia ambiental, normativa, jurisprudencial, territorial y de sostenibilidad orientada a equipos ambientales y de sostenibilidad de organizaciones en Colombia.
 
-## Qué agrega V0.4
+La versión V0.6 cambia el paradigma del proyecto: la aplicación principal vive en **Next.js + Vercel + Neon PostgreSQL**, mientras los recolectores incorporan información pública sin bloquear la experiencia del usuario.
 
-- Nuevo módulo **Inteligencia sectorial y sostenibilidad**.
-- Rastreo de gremios empresariales y sectoriales colombianos, además de portales ambientales y de sostenibilidad.
-- Separación estricta entre **documentos oficiales** y **noticias/alertas secundarias**: una publicación gremial que menciona una resolución no se guarda como si fuera la resolución oficial.
-- Clasificación empresarial por sector, tema ambiental, tipo de publicación e impacto potencial para la organización.
-- Puntaje de relevancia y nivel de alerta: `Alta`, `Media` o `Informativa`.
-- Explicación breve de **por qué importa** al equipo ambiental/sostenibilidad.
-- Impactos posibles: cumplimiento normativo, operación ambiental, costos/eficiencia, riesgo climático/continuidad, estrategia/competitividad, reputación/ESG y cadena de suministro.
-- Consolidación de noticias repetidas: el mismo titular/fecha no genera múltiples fichas; se pueden asociar varias fuentes al mismo registro.
-- Dashboard ampliado con inteligencia sectorial, alertas regulatorias y alertas de alta prioridad.
-- Filtros nuevos por sector y nivel de alerta.
-- Novedades documentales continúa separado de las noticias para no mezclar vigilancia jurídica con monitoreo sectorial.
+## Aplicación web
 
-## Fuentes sectoriales y de sostenibilidad incluidas
+La aplicación web está en `apps/web` y ofrece:
 
-El catálogo `sources_registry.csv` incorpora, entre otras:
+- Dashboard conectado a Neon PostgreSQL.
+- Base documental consolidada.
+- Buscador por texto.
+- Filtros por tipo documental, tema, autoridad, territorio, departamento y año.
+- Módulo de jurisprudencia.
+- Módulo de planes, políticas e instrumentos de planeación.
+- Módulo de documentos técnicos.
+- Inteligencia sectorial y sostenibilidad.
+- Inventario y estado de fuentes.
+- Actualización bajo demanda desde la interfaz.
+- Enriquecimiento automático de fecha, descripción, resumen, tema, palabras clave y enlaces PDF cuando la fuente los expone.
+- Deduplicación por identidad/URL/hash.
+
+## Cobertura documental prevista
+
+### Normativa
+
+- Leyes.
+- Decretos.
+- Resoluciones.
+- Acuerdos.
+- Circulares.
+- Autos.
+- Conceptos.
+- Proyectos y agenda regulatoria cuando estén disponibles.
+
+### Jurisprudencia
+
+- Corte Constitucional.
+- Consejo de Estado.
+- Otros repositorios judiciales que puedan integrarse de forma verificable.
+
+### Planeación y política pública
+
+- Políticas públicas ambientales.
+- CONPES.
+- Plan Nacional de Desarrollo.
+- Planes de desarrollo departamentales y municipales.
+- PGAR.
+- POMCA.
+- PORH.
+- PGIRS.
+- PSMV.
+- PUEAA.
+- POT, PBOT y EOT.
+- Planes climáticos.
+- Planes de manejo y otros instrumentos estratégicos.
+
+### Documentación técnica
+
+- Guías.
+- Protocolos.
+- Manuales.
+- Metodologías.
+- Lineamientos.
+- Publicaciones técnicas.
+
+### Inteligencia empresarial y sostenibilidad
 
 - ANDI.
-- FENALCO y su monitoreo jurídico/regulatorio.
-- CAMACOL y contenidos de sostenibilidad.
+- FENALCO.
 - ANDESCO.
-- Asociación Colombiana del Petróleo y Gas (ACP).
+- CAMACOL.
+- CECODES.
+- Consejo Colombiano de Construcción Sostenible (CCCS).
+- ACP.
 - Naturgas.
 - SER Colombia.
-- Asociación Colombiana de Minería (ACM).
+- Asociación Colombiana de Minería.
 - Acoplásticos.
 - Fedepalma.
 - Asocaña.
 - ASOCARS.
-- CECODES.
-- Consejo Colombiano de Construcción Sostenible (CCCS).
-- Sustenomics.
-- Comunicación Sostenible.
-- El Espectador - Ambiente.
-- Mongabay Latam - Colombia.
+- Portales ambientales y de sostenibilidad configurados en `sources_registry.csv`.
 
-Estas fuentes se suman a MinAmbiente, ANLA, SUIN, Corte Constitucional, Consejo de Estado, DNP, IDEAM, autoridades ambientales regionales y las demás fuentes documentales incorporadas en versiones anteriores.
+## Arquitectura
 
-## Modelo de información
+```text
+FUENTES PÚBLICAS
+      │
+      ▼
+RECOLECTORES RADAR
+      │
+      ├─ extracción
+      ├─ clasificación
+      ├─ enriquecimiento
+      └─ deduplicación
+      │
+      ▼
+NEON POSTGRESQL
+      │
+      ▼
+NEXT.JS / VERCEL
+      │
+      ├─ Dashboard
+      ├─ Base documental
+      ├─ Buscador y filtros
+      ├─ Inteligencia sectorial
+      └─ Fuentes
+```
 
-### Base documental oficial
+La versión de escritorio Electron permanece en el repositorio como legado/evolución opcional, pero no es el núcleo de producción de V0.6.
 
-Incluye, según disponibilidad de cada fuente:
+## Actualización del Radar
 
-- Leyes, decretos, resoluciones, acuerdos, circulares, autos y conceptos.
-- Jurisprudencia.
-- Políticas públicas y documentos CONPES.
-- PND y planes de desarrollo.
-- PGAR, POMCA, PORH, PSMV, PUEAA y PGIRS.
-- POT, PBOT y EOT.
-- Planes climáticos y otros instrumentos estratégicos.
-- Protocolos, guías, manuales, metodologías, lineamientos y documentos técnicos.
+Desde el Dashboard el usuario puede pulsar **Actualizar Radar**. La web obtiene las fuentes operativas y las procesa secuencialmente, mostrando progreso, documentos nuevos, actualizados y errores.
 
-### Inteligencia sectorial y sostenibilidad
+También existe `.github/workflows/update-radar.yml`, que permite:
 
-Tipos previstos:
+- ejecución manual desde GitHub Actions;
+- actualización programada diaria de producción.
 
-- Alerta regulatoria.
-- Alerta sectorial.
-- Comunicado gremial.
-- Estudio / informe sectorial.
-- Informe de sostenibilidad.
-- Noticia sectorial.
-
-Metadatos adicionales:
-
-- fuente y categoría de fuente;
-- sector;
-- fecha de publicación;
-- tema principal y subtemas;
-- impacto empresarial;
-- nivel de alerta;
-- puntaje de relevancia;
-- explicación de relevancia;
-- enlace a la publicación original.
+Los sitios bloqueados o incompatibles con extracción HTML genérica se mantienen identificados para desarrollar conectores especializados sin detener al resto del sistema.
 
 ## Antiduplicados
 
-El Radar combina identidad documental, URL canónica y hash de contenido. Para noticias y alertas también genera una identidad basada en el titular normalizado y la fecha. Si una publicación ya existe:
+Los documentos se consolidan usando:
 
-- si no cambió, no la vuelve a insertar;
-- si cambió materialmente, actualiza el registro;
-- si otra fuente publica la misma noticia, conserva una sola ficha y asocia la fuente adicional cuando es posible.
+- `document_key`;
+- URL canónica;
+- hash de contenido;
+- asociación entre documento y múltiples fuentes.
 
-## Instalación en Windows
+Las noticias usan el mismo principio mediante `news_key`, URL canónica y hash. Una nueva revisión no vuelve a insertar un registro sin cambios.
 
-En PowerShell, dentro de la carpeta del proyecto:
+## Metadatos
+
+La plataforma maneja, según disponibilidad:
+
+- título;
+- familia y tipo documental;
+- número y año;
+- fecha de expedición;
+- fecha de publicación;
+- autoridad;
+- ámbito geográfico;
+- departamento y municipio;
+- tema principal;
+- subtemas y palabras clave;
+- descripción y resumen;
+- estado/alcance jurídico;
+- URL oficial;
+- PDF;
+- fecha de primera detección y última revisión.
+
+Para inteligencia sectorial añade:
+
+- sector económico;
+- impacto empresarial;
+- nivel de alerta;
+- puntaje y razón de relevancia.
+
+## Desarrollo web
 
 ```powershell
+cd apps/web
 npm install
-npm start
+npm run dev
 ```
 
-V0.4 mantiene `@electron/rebuild` como `postinstall` para reconstruir `better-sqlite3` contra la ABI de Electron.
+La aplicación requiere:
 
-Si npm bloquea scripts de instalación:
-
-```powershell
-npm approve-scripts better-sqlite3 electron electron-winstaller
-npm install
-npm start
+```text
+DATABASE_URL
 ```
 
-Si vuelve a aparecer un error de `NODE_MODULE_VERSION`:
+apuntando a Neon PostgreSQL.
 
-```powershell
-npm run rebuild
-npm start
+## Producción
+
+Vercel está configurado con:
+
+```text
+Root Directory: apps/web
+Framework: Next.js
 ```
 
-No se recomienda ejecutar `npm audit fix --force` como respuesta al error de ABI, porque es un problema distinto y puede introducir cambios incompatibles.
+Los cambios fusionados a `main` se despliegan automáticamente.
 
-## Actualización automática
+## Principio jurídico
 
-Al iniciar, el Radar revisa las fuentes activas. La interfaz registra por fuente documentos encontrados, nuevos, actualizados, sin cambios y errores. Los portales que requieren JavaScript, CAPTCHA, APIs privadas, navegación compleja o autenticación pueden necesitar un conector especializado en versiones posteriores.
+Radar Ambiental Colombia es una herramienta de vigilancia, búsqueda y apoyo a la gestión. La clasificación, resumen y priorización son auxiliares. **La fuente primaria oficial sigue siendo la referencia para determinar contenido, vigencia, alcance y obligaciones jurídicas.**
 
-## Criterio de uso empresarial
+## Próxima evolución
 
-El módulo sectorial busca reducir ruido. Una nota se prioriza cuando tiene relación con ambiente/sostenibilidad y además puede afectar a una organización en Colombia por cumplimiento, operación, costos, riesgo, estrategia, ESG o cadena de suministro.
-
-La clasificación es una ayuda de vigilancia y **no sustituye la validación jurídica, técnica ni la lectura de la fuente primaria**. Para obligaciones legales, el Radar debe remitir al documento oficial correspondiente.
-
-## Próximos pasos recomendados
-
-- Conectores especializados para las fuentes con mayor valor y páginas dinámicas.
-- Relacionar automáticamente una alerta gremial con la norma oficial a la que hace referencia.
-- Perfiles por sector económico y matriz de materialidad de la organización.
-- Alertas configurables por tema, autoridad, territorio, sector e impacto.
-- Resúmenes y análisis asistidos por IA con trazabilidad a las fuentes.
-- Migración progresiva a arquitectura centralizada GitHub + PostgreSQL + web/desktop.
+- conectores especializados para SUIN, Corte Constitucional, Consejo de Estado y portales dinámicos;
+- relaciones jurídicas `MODIFICA`, `DEROGA`, `REGLAMENTA`, `COMPLEMENTA`, `SUSTITUYE`, `DESARROLLA`, `INTERPRETA` y `CITA`;
+- perfil de organización por sector, ubicación y materialidad;
+- alertas personalizadas;
+- análisis asistido por IA con trazabilidad al documento fuente.

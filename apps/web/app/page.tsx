@@ -1,249 +1,137 @@
-"use client";
+import Link from "next/link";
+import Sidebar from "@/components/Sidebar";
+import UpdateRadarButton from "@/components/UpdateRadarButton";
+import { getDashboardData } from "@/lib/radar";
 
-import { useMemo, useState } from "react";
+export const dynamic = "force-dynamic";
 
-const novedades = [
-  {
-    tipo: "Alerta regulatoria",
-    titulo: "Proyecto de regulación ambiental",
-    autoridad: "Ministerio de Ambiente",
-    fecha: "07/09/2026",
-    tema: "Agua y vertimientos",
-    territorio: "Nacional",
-    prioridad: "Alta",
-    descripcion:
-      "Documento de demostración para validar el funcionamiento del Radar Ambiental.",
-  },
-  {
-    tipo: "Jurisprudencia",
-    titulo: "Nueva decisión judicial ambiental",
-    autoridad: "Corte Constitucional",
-    fecha: "05/09/2026",
-    tema: "Biodiversidad",
-    territorio: "Nacional",
-    prioridad: "Media",
-    descripcion:
-      "Registro de demostración. Posteriormente será reemplazado por información obtenida automáticamente.",
-  },
-  {
-    tipo: "Inteligencia sectorial",
-    titulo: "Actualización empresarial sobre economía circular",
-    autoridad: "Gremio empresarial",
-    fecha: "03/09/2026",
-    tema: "Economía circular",
-    territorio: "Colombia",
-    prioridad: "Media",
-    descripcion:
-      "Ejemplo de noticia relevante para equipos ambientales y de sostenibilidad.",
-  },
-];
-
-export default function Home() {
-  const [busqueda, setBusqueda] = useState("");
-  const [tema, setTema] = useState("Todos");
-
-  const filtradas = useMemo(() => {
-    return novedades.filter((item) => {
-      const coincideTexto =
-        item.titulo.toLowerCase().includes(busqueda.toLowerCase()) ||
-        item.autoridad.toLowerCase().includes(busqueda.toLowerCase()) ||
-        item.descripcion.toLowerCase().includes(busqueda.toLowerCase());
-
-      const coincideTema = tema === "Todos" || item.tema === tema;
-
-      return coincideTexto && coincideTema;
-    });
-  }, [busqueda, tema]);
+export default async function Home() {
+  const data = await getDashboardData();
+  const { metrics } = data;
 
   return (
     <div className="app-shell">
-      <aside className="sidebar">
-        <div className="brand">
-          <div className="brand-icon">🌎</div>
-          <div>
-            <strong>RADAR AMBIENTAL</strong>
-            <span>COLOMBIA</span>
-          </div>
-        </div>
-
-        <nav>
-          <a className="nav-item active">▣ Dashboard</a>
-          <a className="nav-item">⚡ Novedades</a>
-          <a className="nav-item">▤ Base documental</a>
-          <a className="nav-item">⌕ Buscador</a>
-
-          <div className="nav-title">INTELIGENCIA</div>
-
-          <a className="nav-item">⚖ Jurisprudencia</a>
-          <a className="nav-item">📋 Políticas y planes</a>
-          <a className="nav-item">📐 Documentos técnicos</a>
-          <a className="nav-item">🏭 Inteligencia sectorial</a>
-
-          <div className="nav-title">CLASIFICACIÓN</div>
-
-          <a className="nav-item">◈ Temas</a>
-          <a className="nav-item">🏛 Autoridades</a>
-          <a className="nav-item">⌖ Territorio</a>
-
-          <div className="nav-title">SISTEMA</div>
-
-          <a className="nav-item">🔗 Fuentes</a>
-          <a className="nav-item">✨ Análisis IA</a>
-          <a className="nav-item">⚙ Configuración</a>
-        </nav>
-      </aside>
+      <Sidebar active="dashboard" />
 
       <main className="main">
-        <header className="topbar">
+        <header className="topbar hero-topbar">
           <div>
-            <h1>Dashboard</h1>
+            <div className="eyebrow">PLATAFORMA WEB V0.6</div>
+            <h1>Radar Ambiental Colombia</h1>
             <p>
-              Inteligencia ambiental, normativa y de sostenibilidad para
-              organizaciones en Colombia
+              Inteligencia normativa, jurisprudencial, territorial, técnica y de
+              sostenibilidad para equipos ambientales en Colombia.
             </p>
           </div>
-
-          <div className="update-box">
-            <span>Última actualización</span>
-            <strong>Datos de demostración</strong>
-          </div>
+          <UpdateRadarButton />
         </header>
 
-        <section className="cards">
-          <MetricCard
-            value="0"
-            label="Nuevas normas"
-            description="Últimos 30 días"
-          />
-          <MetricCard
-            value="0"
-            label="Jurisprudencia"
-            description="Nuevas decisiones"
-          />
-          <MetricCard
-            value="0"
-            label="Planes y políticas"
-            description="Documentos detectados"
-          />
-          <MetricCard
-            value="0"
-            label="Alertas sectoriales"
-            description="Gremios y sostenibilidad"
-          />
+        {data.error ? (
+          <section className="system-alert">
+            <strong>No pudimos leer la base de datos.</strong>
+            <span>{data.error}</span>
+          </section>
+        ) : (
+          <section className="success-banner">
+            <span className="live-dot" />
+            <div><strong>Neon conectado</strong><span>La aplicación está leyendo datos reales de PostgreSQL.</span></div>
+          </section>
+        )}
+
+        <section className="cards" aria-label="Indicadores principales">
+          <MetricCard value={metrics.documents} label="Documentos" description="Normas, planes, políticas y técnicos" href="/documents" />
+          <MetricCard value={metrics.jurisprudence} label="Jurisprudencia" description="Sentencias y decisiones" href="/documents?type=Jurisprudencia" />
+          <MetricCard value={metrics.plansPolicies} label="Planes y políticas" description="Instrumentos de planeación" href="/documents?type=Planeaci%C3%B3n%20y%20pol%C3%ADtica" />
+          <MetricCard value={metrics.news} label="Inteligencia sectorial" description="Noticias y alertas empresariales" href="/news" />
         </section>
 
         <section className="panel">
           <div className="panel-header">
             <div>
-              <h2>Radar de novedades</h2>
-              <p>
-                Normativa, jurisprudencia, planeación e inteligencia sectorial
-              </p>
+              <h2>Fuentes monitoreadas</h2>
+              <p>Portales oficiales, autoridades, gremios y fuentes especializadas enlazadas desde la plataforma.</p>
             </div>
-
-            <div className="badge-demo">Datos de demostración</div>
+            <Link className="text-link" href="/sources">Ver fuentes y enlaces →</Link>
           </div>
 
-          <div className="filters">
-            <input
-              value={busqueda}
-              onChange={(e) => setBusqueda(e.target.value)}
-              placeholder="Buscar norma, autoridad, tema o palabra clave..."
-            />
-
-            <select value={tema} onChange={(e) => setTema(e.target.value)}>
-              <option>Todos</option>
-              <option>Agua y vertimientos</option>
-              <option>Biodiversidad</option>
-              <option>Economía circular</option>
-            </select>
-
-            <select>
-              <option>Todo el territorio</option>
-              <option>Nacional</option>
-              <option>Antioquia</option>
-              <option>Bogotá D.C.</option>
-            </select>
-          </div>
-
-          <div className="results">
-            {filtradas.map((item, index) => (
-              <article className="alert-card" key={index}>
-                <div className="alert-top">
+          {data.problemSources.length > 0 ? (
+            <div className="issue-list">
+              {data.problemSources.map((source) => (
+                <article className="source-row" key={source.id}>
                   <div>
-                    <span className="document-type">{item.tipo}</span>
-
-                    <span
-                      className={
-                        item.prioridad === "Alta"
-                          ? "priority priority-high"
-                          : "priority"
-                      }
-                    >
-                      {item.prioridad}
-                    </span>
+                    <strong>{source.name}</strong>
+                    <span>{source.source_type ?? "Fuente ambiental"}</span>
                   </div>
+                  <div className={`status-pill status-${source.status ?? "pending"}`}>{formatStatus(source.status)}</div>
+                  {source.official_url ? <a href={source.official_url} target="_blank" rel="noreferrer">Abrir fuente ↗</a> : <span className="muted">Sin URL</span>}
+                </article>
+              ))}
+            </div>
+          ) : (
+            <div className="why-box"><b>Monitoreo activo.</b> Consulta el inventario para ver cada fuente y abrir su enlace oficial.</div>
+          )}
+        </section>
 
-                  <span className="date">{item.fecha}</span>
-                </div>
-
-                <h3>{item.titulo}</h3>
-
-                <div className="metadata">
-                  <span>
-                    <b>Autoridad:</b> {item.autoridad}
-                  </span>
-                  <span>
-                    <b>Tema:</b> {item.tema}
-                  </span>
-                  <span>
-                    <b>Territorio:</b> {item.territorio}
-                  </span>
-                </div>
-
-                <p>{item.descripcion}</p>
-
-                <div className="card-actions">
-                  <button>Ver detalle</button>
-                  <button className="secondary">Documento / fuente ↗</button>
-                </div>
-              </article>
-            ))}
+        <section className="panel">
+          <div className="panel-header">
+            <div>
+              <h2>Documentos recientes</h2>
+              <p>Información incorporada por los recolectores y deduplicada por URL e identidad documental.</p>
+            </div>
+            <Link className="text-link" href="/documents">Buscar en la base →</Link>
           </div>
+
+          {data.recentDocuments.length === 0 ? (
+            <div className="empty-state">
+              <strong>La base documental está lista para recibir información.</strong>
+              <p>Pulsa “Actualizar Radar” para iniciar la primera captura desde las fuentes actualmente operativas.</p>
+            </div>
+          ) : (
+            <div className="results">
+              {data.recentDocuments.map((document) => (
+                <article className="alert-card" key={document.id}>
+                  <div className="alert-top">
+                    <span className="document-type">{document.document_type ?? document.document_family ?? "Documento"}</span>
+                    <span className="date">{formatDate(document.date_published ?? document.date_issued)}</span>
+                  </div>
+                  <h3>{document.title}</h3>
+                  <div className="metadata">
+                    <span><b>Tema:</b> {document.main_topic ?? "Por clasificar"}</span>
+                    <span><b>Territorio:</b> {document.municipality ?? document.department ?? document.geographic_scope ?? "Colombia"}</span>
+                  </div>
+                  {(document.official_url || document.pdf_url) ? (
+                    <div className="card-actions">
+                      <a className="button-link" href={document.pdf_url ?? document.official_url ?? "#"} target="_blank" rel="noreferrer">Ver documento oficial ↗</a>
+                    </div>
+                  ) : null}
+                </article>
+              ))}
+            </div>
+          )}
         </section>
 
         <section className="bottom-grid">
           <div className="panel">
-            <h2>Temas bajo vigilancia</h2>
-
+            <div className="panel-header"><div><h2>Temas bajo vigilancia</h2><p>Clasificación orientada a gestión ambiental empresarial.</p></div></div>
             <div className="topic-list">
-              <Topic name="Agua y vertimientos" />
+              <Topic name="Agua, saneamiento y vertimientos" />
               <Topic name="Residuos y economía circular" />
-              <Topic name="Cambio climático" />
-              <Topic name="Biodiversidad" />
-              <Topic name="Emisiones atmosféricas" />
-              <Topic name="Licenciamiento ambiental" />
+              <Topic name="Cambio climático y energía" />
+              <Topic name="Biodiversidad y áreas protegidas" />
+              <Topic name="Aire, ruido y emisiones" />
+              <Topic name="Licenciamiento y permisos" />
+              <Topic name="Ordenamiento territorial" />
             </div>
           </div>
 
           <div className="panel">
-            <h2>Inteligencia sectorial</h2>
-
-            <p className="muted">
-              Seguimiento de información ambiental y de sostenibilidad
-              publicada por gremios y organizaciones empresariales.
-            </p>
-
+            <div className="panel-header"><div><h2>Inteligencia empresarial</h2><p>Alertas de gremios y portales de sostenibilidad.</p></div><Link className="text-link" href="/news">Ver alertas →</Link></div>
             <div className="source-tags">
-              <span>ANDI</span>
-              <span>FENALCO</span>
-              <span>ANDESCO</span>
-              <span>CAMACOL</span>
-              <span>CECODES</span>
-              <span>CCCS</span>
-              <span>ACP</span>
-              <span>Naturgas</span>
+              <span>ANDI</span><span>FENALCO</span><span>ANDESCO</span><span>CAMACOL</span>
+              <span>CECODES</span><span>CCCS</span><span>ACP</span><span>Naturgas</span>
+              <span>SER Colombia</span><span>Acoplásticos</span>
             </div>
+            <div className="why-box"><b>Objetivo:</b> identificar cambios con impacto en cumplimiento, operación, costos, riesgo climático, reputación, ESG y cadena de suministro.</div>
           </div>
         </section>
       </main>
@@ -251,29 +139,30 @@ export default function Home() {
   );
 }
 
-function MetricCard({
-  value,
-  label,
-  description,
-}: {
-  value: string;
-  label: string;
-  description: string;
-}) {
+function MetricCard({ value, label, description, href }: { value: number; label: string; description: string; href: string }) {
   return (
-    <div className="metric-card">
+    <Link className="metric-card metric-link" href={href}>
       <div className="metric-number">{value}</div>
       <strong>{label}</strong>
       <span>{description}</span>
-    </div>
+      <small>Explorar →</small>
+    </Link>
   );
 }
 
 function Topic({ name }: { name: string }) {
-  return (
-    <div className="topic">
-      <span>{name}</span>
-      <span>→</span>
-    </div>
-  );
+  return <Link className="topic" href={`/documents?topic=${encodeURIComponent(name)}`}><span>{name}</span><span>→</span></Link>;
+}
+
+function formatStatus(status: string | null) {
+  if (!status) return "Pendiente";
+  const labels: Record<string, string> = { online: "Operativa", blocked: "Bloqueada", error: "Error", http_502: "HTTP 502", rate_limited: "Limitada", pending: "Pendiente" };
+  return labels[status] ?? status.replaceAll("_", " ");
+}
+
+function formatDate(value: string | null) {
+  if (!value) return "Fecha no disponible";
+  const date = new Date(value.length <= 10 ? `${value}T00:00:00` : value);
+  if (Number.isNaN(date.getTime())) return value;
+  return new Intl.DateTimeFormat("es-CO", { dateStyle: "medium", timeZone: "America/Bogota" }).format(date);
 }
