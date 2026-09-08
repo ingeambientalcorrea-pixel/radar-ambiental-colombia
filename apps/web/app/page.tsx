@@ -40,24 +40,18 @@ export default async function Home() {
 
         <section className="cards" aria-label="Indicadores principales">
           <MetricCard value={metrics.documents} label="Documentos" description="Normas, planes, políticas y técnicos" href="/documents" />
-          <MetricCard value={metrics.jurisprudence} label="Jurisprudencia" description="Sentencias y decisiones" href="/documents?type=Sentencia" />
-          <MetricCard value={metrics.plansPolicies} label="Planes y políticas" description="Instrumentos de planeación" href="/documents?type=Plan" />
+          <MetricCard value={metrics.jurisprudence} label="Jurisprudencia" description="Sentencias y decisiones" href="/documents?type=Jurisprudencia" />
+          <MetricCard value={metrics.plansPolicies} label="Planes y políticas" description="Instrumentos de planeación" href="/documents?type=Planeaci%C3%B3n%20y%20pol%C3%ADtica" />
           <MetricCard value={metrics.news} label="Inteligencia sectorial" description="Noticias y alertas empresariales" href="/news" />
         </section>
 
         <section className="panel">
           <div className="panel-header">
             <div>
-              <h2>Estado de las fuentes</h2>
-              <p>Monitoreo de portales oficiales, autoridades, gremios y fuentes especializadas.</p>
+              <h2>Fuentes monitoreadas</h2>
+              <p>Portales oficiales, autoridades, gremios y fuentes especializadas enlazadas desde la plataforma.</p>
             </div>
-            <Link className="text-link" href="/sources">Ver inventario →</Link>
-          </div>
-
-          <div className="health-grid">
-            <HealthCard value={metrics.sources} label="Configuradas" tone="neutral" />
-            <HealthCard value={metrics.onlineSources} label="Operativas" tone="good" />
-            <HealthCard value={metrics.problemSources} label="Requieren revisión" tone="warn" />
+            <Link className="text-link" href="/sources">Ver fuentes y enlaces →</Link>
           </div>
 
           {data.problemSources.length > 0 ? (
@@ -73,7 +67,9 @@ export default async function Home() {
                 </article>
               ))}
             </div>
-          ) : null}
+          ) : (
+            <div className="why-box"><b>Monitoreo activo.</b> Consulta el inventario para ver cada fuente y abrir su enlace oficial.</div>
+          )}
         </section>
 
         <section className="panel">
@@ -152,10 +148,6 @@ function MetricCard({ value, label, description, href }: { value: number; label:
       <small>Explorar →</small>
     </Link>
   );
-}
-
-function HealthCard({ value, label, tone }: { value: number; label: string; tone: "neutral" | "good" | "warn" }) {
-  return <div className={`health-card health-${tone}`}><strong>{value}</strong><span>{label}</span></div>;
 }
 
 function Topic({ name }: { name: string }) {
