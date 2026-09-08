@@ -1,10 +1,12 @@
 import { collectSourceById, listCollectableSources } from "@/lib/collector";
+import { ensureCoreSources } from "@/lib/core-sources";
 import { enrichSourceItems } from "@/lib/enrichment";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 30;
 
 export async function GET() {
+  await ensureCoreSources();
   const sources = await listCollectableSources();
 
   return Response.json({
