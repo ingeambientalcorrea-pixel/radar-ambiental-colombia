@@ -2,6 +2,9 @@ name: Actualizar Radar Ambiental
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - main
   schedule:
     - cron: "15 11 * * *"
 
@@ -10,25 +13,46 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
+      - name: Esperar despliegue de Vercel
+        shell: bash
+        run: |
+          set -euo pipefail
+          BASE_URL="https://radar-ambiental-colombia-ashen.vercel.app"
+          for attempt in $(seq 1 30); do
+            if curl --fail --silent --show-error --max-time 12 "$BASE_URL/api/health" > health.json; then
+              if jq -e '.ok == true' health.json > /dev/null; then
+                echo "Producción disponible"
+                cat health.json
+                exit 0
+              fi
+            fi
+            echo "Esperando Vercel... intento $attempt/30"
+            sleep 10
+          done
+          echo "La producción no respondió a tiempo"
+          exit 1
+
       - name: Obtener fuentes operativas
         id: targets
         shell: bash
         run: |
           set -euo pipefail
           BASE_URL="https://radar-ambiental-colombia-ashen.vercel.app"
-          curl --fail --silent --show-error "$BASE_URL/api/update" > targets.json
-          echo "Fuentes disponibles: $(jq '.total' targets.json)"
+          curl --fail --silent --show-error --max-time 20 "$BASE_URL/api/update" > targets.json
+          echo "Fuentes disponibles para actualización: $(jq '.total' targets.json)"
 
       - name: Actualizar fuentes secuencialmente
         shell: bash
         run: |
-          set -u
+          set +e
           BASE_URL="https://radar-ambiental-colombia-ashen.vercel.app"
           total=$(jq '.sources | length' targets.json)
           done_count=0
           error_count=0
+          inserted_total=0
+          updated_total=0
 
-          jq -r '.sources[].id' targets.json | while read -r source_id; do
+          while read -r source_id; do
             done_count=$((done_count + 1))
             echo "[$done_count/$total] Fuente $source_id"
 
@@ -36,8 +60,13 @@ jobs:
               --max-time 35 \
               -X POST "$BASE_URL/api/update" \
               -H "Content-Type: application/json" \
+              -H "X-Radar-Job: github-action-v0.6" \
               --data "{\"sourceId\":\"$source_id\"}" \
               > "result-$source_id.json"; then
+              inserted=$(jq -r '.result.inserted // 0' "result-$source_id.json")
+              updated=$(jq -r '.result.updated // 0' "result-$source_id.json")
+              inserted_total=$((inserted_total + inserted))
+              updated_total=$((updated_total + updated))
               jq -c '{source:.result.sourceName, found:.result.found, inserted:.result.inserted, updated:.result.updated, unchanged:.result.unchanged, enrichment:.enrichment}' "result-$source_id.json" || true
             else
               error_count=$((error_count + 1))
@@ -45,6 +74,12 @@ jobs:
             fi
 
             sleep 1
-          done
+          done < <(jq -r '.sources[].id' targets.json)
 
-          echo "Actualización programada finalizada"
+          echo "Resumen: revisadas=$done_count nuevas=$inserted_total actualizadas=$updated_total errores=$error_count"
+
+      - name: Verificar estado final
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error "https://radar-ambiental-colombia-ashen.vercel.app/api/health" | jq .
